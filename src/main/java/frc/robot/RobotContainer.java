@@ -105,6 +105,15 @@ public class RobotContainer
                                                                     .scaleTranslation(0.8)
                                                                     .scaleRotation(rotationSpeed)
                                                                     .allianceRelativeControl(true);
+  
+  SwerveInputStream driveAngularVelocityKeyboardSlow = SwerveInputStream.of(drivebase.getSwerveDrive(),
+                                                                        () -> -driverXbox.getLeftY(),
+                                                                        () -> -driverXbox.getLeftX())
+                                                                    .withControllerRotationAxis(() -> driverXbox.getRawAxis(
+                                                                        2))
+                                                                    .deadband(OperatorConstants.DEADBAND)
+                                                                    .scaleTranslation(0.3)
+                                                                    .allianceRelativeControl(true);
   // Derive the heading axis with math!
   SwerveInputStream driveDirectAngleKeyboard     = driveAngularVelocityKeyboard.copy()
                                                                                .withControllerHeadingAxis(() ->
@@ -126,7 +135,6 @@ public class RobotContainer
                                                                                .translationHeadingOffset(Rotation2d.fromDegrees(
                                                                                    0));
 
-  
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -160,16 +168,6 @@ public class RobotContainer
     //     rotationSpeed = 0.3;
     //   }));
 
-    if (RobotBase.isSimulation())
-    {
-      drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
-    } 
-    else
-    {
-      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    }
-
-
     if (Robot.isSimulation())
     {
       Pose2d target = new Pose2d(new Translation2d(1, 4),
@@ -190,18 +188,12 @@ public class RobotContainer
       driverXbox.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
       driverXbox.button(2).whileTrue(Commands.runEnd(() -> driveDirectAngleKeyboard.driveToPoseEnabled(true),
                                                      () -> driveDirectAngleKeyboard.driveToPoseEnabled(false)));
-      
 
-      // slowMode = driverXbox.getRightTriggerAxis() > 0.5;
+//      driverXbox.b().whileTrue(
+//          drivebase.driveToPose(
+//              new Pose2d(new Translation2d(4, 4), Rotation2d.fromDegrees(0)))
+//                              );
 
-      // slow mode command :)
-      // new Trigger(() -> driverXbox.getRightTriggerAxis() > 0.5)
-      // .onTrue(new InstantCommand(() -> speed = lowSpeed))
-      // .onFalse(new InstantCommand(() -> speed = normalSpeed));
-
-      //  driverXbox.rightTrigger()
-      //  .whileTrue(new InstantCommand(() -> speed = lowSpeed))
-      //  .onFalse(new InstantCommand(() -> speed = normalSpeed));
     }
     if (DriverStation.isTest())
     {
