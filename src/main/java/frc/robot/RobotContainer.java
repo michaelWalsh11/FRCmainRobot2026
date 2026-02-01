@@ -75,8 +75,8 @@ public class RobotContainer
                     .allianceRelativeControl(true);
 
   SwerveInputStream driveAngularSlow = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                    () -> driverXbox.getLeftY() * -1,
-                    () -> driverXbox.getLeftX() * -1)
+                    () -> driverXbox.getLeftY() * -.5, // Set these values for slower: 1/2 Speed
+                    () -> driverXbox.getLeftX() * -.5) // Set these values for slower: 1/2 Speed
                     .withControllerRotationAxis(driverXbox::getRightX)
                     .deadband(OperatorConstants.DEADBAND)
                     .scaleTranslation(0.3)
@@ -158,27 +158,10 @@ public class RobotContainer
     Command driveFieldOrientedDirectAngleKeyboard      = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
+
+    // Slow Mode Fix Temporary - Right Trigger Makes the Robot Drive Slow - michaudc
+    driverRTrigger.whileTrue(drivebase.driveFieldOriented(driveAngularSlow));
     
-
-
-    if (RobotBase.isSimulation() && !slowMode)
-    {
-      drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
-    } 
-    if (RobotBase.isSimulation() && slowMode)
-    {
-      drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboardSlow);
-    }
-    else if (!slowMode)
-    {
-      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    }
-    else if (slowMode)
-    {
-      drivebase.setDefaultCommand(driveFieldOrientedAngularVelocitySlow);
-    }
-
-
     if (Robot.isSimulation())
     {
       Pose2d target = new Pose2d(new Translation2d(1, 4),
@@ -199,17 +182,6 @@ public class RobotContainer
       driverXbox.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
       driverXbox.button(2).whileTrue(Commands.runEnd(() -> driveDirectAngleKeyboard.driveToPoseEnabled(true),
                                                      () -> driveDirectAngleKeyboard.driveToPoseEnabled(false)));
-      
-      boolean toggle = false;
-      if (driverXbox.getRightTriggerAxis() > 0.5 && toggle == false)
-      {
-        slowMode = !slowMode;
-        toggle = true;
-      }
-      if (driverXbox.getRightTriggerAxis() < 0.5 && toggle == true)
-      {
-        toggle = false;
-      }
     }
     if (DriverStation.isTest())
     {
